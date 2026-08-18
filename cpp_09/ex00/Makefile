@@ -3,12 +3,13 @@ INC_DIR			=		inc
 SRC_DIR			=		src
 OBJ_DIR			=		obj
 BIN_DIR			=		bin
-NAME			=		<noname>
+NAME			=		btc
 CXX				=		c++
 CXXFLAGS		=		-Wall -Wextra -Werror -std=c++98 -I$(INC_DIR)
 
 # sources and objects
-SRCS			=		main.cpp
+SRCS			=		main.cpp	\
+						BitcoinExchange.cpp
 
 OBJS			=		$(SRCS:%.cpp=$(OBJ_DIR)/%.o)
 
