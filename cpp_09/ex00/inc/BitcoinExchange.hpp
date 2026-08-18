@@ -21,6 +21,8 @@ class	BitcoinExchange
 		~BitcoinExchange();										// destructor
 
 		void	parseInputFile(const std::string& inputFilename);
+		bool	splitLine(const std::string &line, std::string &dateStr, std::string &valueStr);
+
 
 };
 
