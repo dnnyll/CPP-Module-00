@@ -22,8 +22,15 @@ class	BitcoinExchange
 
 		void	parseInputFile(const std::string& inputFilename);
 		bool	splitLine(const std::string &line, std::string &dateStr, std::string &valueStr);
+		bool	validateDate(const std::string &dateStr);
+		bool	validateValue(std::string &valueStr);
+		double	getRate(const std::string &dateStr);
+
 
 
 };
+
+// static bool	convertYear(std::string &dateStr);
+
 
 #endif
