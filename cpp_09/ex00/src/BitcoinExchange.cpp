@@ -7,7 +7,7 @@
 
 BitcoinExchange::BitcoinExchange()
 {
-	// could call loadDatabase("data.csv") here, or leave it to be called explicitly
+	loadDatabase("data.csv");
 }
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange &src)
@@ -54,18 +54,19 @@ bool	BitcoinExchange::splitLine(const std::string &line, std::string &dateStr, s
 		dateStr = line.substr(0, position);
 		valueStr = line.substr(position + 1);
 
-		// debug
-		std::cout << "splitLine" << std::endl;
-		std::cout << "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
+		#ifdef DEBUG
+		std::cout << "[SPLITLINE]" << "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
+		#endif
+
 		return (true);
 }
 
 // converts date str into int and verifies if the date is in the calendar
 static bool	convertYear(const std::string &dateStr)
 {
-	int	year = std::atoi(dateStr.substr(0, 4).c_str());
-	int	month = std::atoi(dateStr.substr(5, 2).c_str());
-	int	day = std::atoi(dateStr.substr(8, 2).c_str());
+	int	year =	std::atoi(dateStr.substr(0, 4).c_str());
+	int	month =	std::atoi(dateStr.substr(5, 2).c_str());
+	int	day =	std::atoi(dateStr.substr(8, 2).c_str());
 	
 	if (month < 1 || month > 12)
 		return (false);
@@ -83,6 +84,7 @@ static bool	convertYear(const std::string &dateStr)
 	return (true);
 }
 
+// verifies the format of the date str
 bool	BitcoinExchange::validateDate(const std::string &dateStr)
 {
 	if(dateStr.size() != 10)
@@ -110,6 +112,7 @@ bool	BitcoinExchange::validateDate(const std::string &dateStr)
 	return (true);
 }
 
+// verifie if the value str is well formulated and returns error if not
 bool	BitcoinExchange::validateValue(std::string &valueStr)
 {
 	char	*lastChar;
@@ -133,7 +136,7 @@ bool	BitcoinExchange::validateValue(std::string &valueStr)
 	return (true);
 }
 
-
+// compares input to our _data(base)
 double	BitcoinExchange::getRate(const std::string &dateStr)
 {
 	std::map<std::string, float>::iterator it = _data.lower_bound(dateStr);
@@ -149,6 +152,41 @@ double	BitcoinExchange::getRate(const std::string &dateStr)
 	return (it->second);
 }
 
+// loads the "data.csv" file that is our database for comparison
+void	BitcoinExchange::loadDatabase(const std::string &filename)
+{
+	std::ifstream	file(filename.c_str());
+
+	if(!file.is_open())
+	{
+		std::cerr << "Error: could not open database file." << std::endl;
+		return ;
+	}
+
+	std::string	line;
+	std::getline(file, line);	// skip headerline ("data" | "exchange value")
+
+	while (std::getline(file, line))
+	{
+		size_t	position = line.find(',');
+
+		if (position == std::string::npos)
+			continue ;
+
+		std::string	dateStr = line.substr(0, position);
+		std::string	rateStr = line.substr(position + 1);
+		
+		#ifdef DEBUG
+		std::cout << "[LOADDATABASE]" << "date: [" << dateStr << "] rate: [" << rateStr << "]" << std::endl;
+		#endif
+
+		float	rate = std::strtod(rateStr.c_str(), NULL);
+	
+		_data[dateStr] = rate;
+	}
+}
+
+//	opens inputfile and parses it
 void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 {
 	//	opens the file and ifstream doesnt read strings so c_str converts the string to const char*
@@ -156,7 +194,7 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 	
 	if(!file.is_open())
 	{
-		std::cerr << "Error: could not open file." << std::endl;
+		std::cerr << "Error: could not open input file." << std::endl;
 		return ;
 	}
 
@@ -174,10 +212,9 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		dateStr = trim(dateStr);
 		valueStr = trim(valueStr);
 
-		// debug
-		std::cout << "trimed" << std::endl;
-		std::cout << "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
-
+		#ifdef DEBUG
+		std::cout << "[PARSEINPUTFILE]"<< "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
+		#endif
 
 		if (!validateDate(dateStr))
 			continue ;
@@ -185,9 +222,17 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		if (!validateValue(valueStr))
 			continue ;
 
-		if (!getRate(dateStr))
-			continue ;
+		try
+		{
+			double	rate = getRate(dateStr);
+			double	value = std::strtod(valueStr.c_str(), NULL);
 
-		// TODO: print result
+			std::cout << dateStr << " = > " << valueStr << " = " << value * rate << std::endl;
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << "Error: no earlier date available for date " << dateStr << std::endl;
+		}
+	
 	}
 }

@@ -7,6 +7,12 @@ NAME			=		btc
 CXX				=		c++
 CXXFLAGS		=		-Wall -Wextra -Werror -std=c++98 -I$(INC_DIR)
 
+# debug flag
+ifdef DEBUG
+CXXFLAGS += -DDEBUG
+endif
+
+
 # sources and objects
 SRCS			=		main.cpp	\
 						BitcoinExchange.cpp
@@ -20,6 +26,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # default target
 all: $(BIN_DIR)/$(NAME)
+
+# must fclean before `make debug` if not debug
+.PHONY:debug
+debug: $(MAKE) DEBUG=1 all
 
 # linking binary
 $(BIN_DIR)/$(NAME): $(OBJS)
