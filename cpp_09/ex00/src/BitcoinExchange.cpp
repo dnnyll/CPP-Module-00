@@ -7,16 +7,28 @@
 
 BitcoinExchange::BitcoinExchange()
 {
+	#ifdef DEBUG
+	std::cout << "[CONSTRUCTOR]\tcalled." << std::endl;
+	#endif
+
 	loadDatabase("data.csv");
 }
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange &src)
 {
+	#ifdef DEBUG
+	std::cout << "[COPY CONSTRUCTOR]\tcalled." << std::endl;
+	#endif
+
 	*this = src;
 }
 
 BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &rhs)
 {
+	#ifdef DEBUG
+	std::cout << "[COPY A.OPER.]\tcalled." << std::endl;
+	#endif
+
 	if (this != &rhs)
 		_data = rhs._data;
 	return (*this);
@@ -24,6 +36,9 @@ BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &rhs)
 
 BitcoinExchange::~BitcoinExchange()
 {
+	#ifdef DEBUG
+	std::cout << "[DESTRUCTOR]\tcalled." << std::endl;
+	#endif
 }
 
 // trims content removing shitespaces or tabs
@@ -55,7 +70,7 @@ bool	BitcoinExchange::splitLine(const std::string &line, std::string &dateStr, s
 		valueStr = line.substr(position + 1);
 
 		#ifdef DEBUG
-		std::cout << "[SPLITLINE]" << "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
+		std::cout << "[SPLITLINE]\t" << "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
 		#endif
 
 		return (true);
@@ -139,7 +154,7 @@ bool	BitcoinExchange::validateValue(std::string &valueStr)
 // compares input to our _data(base)
 double	BitcoinExchange::getRate(const std::string &dateStr)
 {
-	std::map<std::string, float>::iterator it = _data.lower_bound(dateStr);
+	std::map<std::string, double>::iterator it = _data.lower_bound(dateStr);
 
 	if (it == _data.end() || it ->first != dateStr)
 	{
@@ -176,14 +191,18 @@ void	BitcoinExchange::loadDatabase(const std::string &filename)
 		std::string	dateStr = line.substr(0, position);
 		std::string	rateStr = line.substr(position + 1);
 		
-		#ifdef DEBUG
-		std::cout << "[LOADDATABASE]" << "date: [" << dateStr << "] rate: [" << rateStr << "]" << std::endl;
-		#endif
-
-		float	rate = std::strtod(rateStr.c_str(), NULL);
+		double	rate = std::strtod(rateStr.c_str(), NULL);
 	
 		_data[dateStr] = rate;
+
+		#ifdef DEBUG
+		std::cout << "[LOADDATABASE]\t" << "date: [" << dateStr << "] rate: [" << rateStr << "]" << std::endl;
+		#endif
+
 	}
+	#ifdef DEBUG
+	std::cerr << "[LOADDATABASE]\tentries loaded: " << _data.size() << std::endl;
+	#endif
 }
 
 //	opens inputfile and parses it
@@ -213,7 +232,7 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		valueStr = trim(valueStr);
 
 		#ifdef DEBUG
-		std::cout << "[PARSEINPUTFILE]"<< "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
+		std::cout << "[PARSEINPUT]\t"<< "date: [" << dateStr << "] value: [" << valueStr << "]" << std::endl;
 		#endif
 
 		if (!validateDate(dateStr))
@@ -227,7 +246,7 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 			double	rate = getRate(dateStr);
 			double	value = std::strtod(valueStr.c_str(), NULL);
 
-			std::cout << dateStr << " = > " << valueStr << " = " << value * rate << std::endl;
+			std::cout << dateStr << " => " << valueStr << " = " << value * rate << std::endl;
 		}
 		catch(std::exception &e)
 		{

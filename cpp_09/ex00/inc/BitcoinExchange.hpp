@@ -8,7 +8,7 @@ class	BitcoinExchange
 
 	// variables
 	private:
-		std::map<std::string, float>	_data;
+		std::map<std::string, double>	_data;
 		//this will contain the date and the exchange rate value of that day
 		//key = date string ("2011-01-03")
 		//value = exchange rate (3.29 or whatever it is that day)

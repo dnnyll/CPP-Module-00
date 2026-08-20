@@ -28,8 +28,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 all: $(BIN_DIR)/$(NAME)
 
 # must fclean before `make debug` if not debug
-.PHONY:debug
-debug: $(MAKE) DEBUG=1 all
+.PHONY: debug
+debug:
+						$(MAKE) fclean
+						$(MAKE) DEBUG=1 all
+
 
 # linking binary
 $(BIN_DIR)/$(NAME): $(OBJS)
