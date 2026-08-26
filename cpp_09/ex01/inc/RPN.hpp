@@ -3,7 +3,6 @@
 
 #include	<stack>
 #include	<string>
-#include	"../inc/RPN.hpp"
 
 class	RPN
 {
@@ -20,9 +19,11 @@ class	RPN
 		RPN(const RPN &src);						// copy constructor
 		RPN &operator=(const RPN &rhs);				// assignment operator
 		~RPN();										// destructor
-		void	parseInput(std::string inputLine);
-		bool	splitLine(const std::string &inputLine);
 
+		int		getResult() const;
+		bool	parseInput(const std::string &inputLine);
+		bool	isOperator(std::string input, size_t currentPosition);
+		bool	calculate(char op);
 
 };
 

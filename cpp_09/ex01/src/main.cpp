@@ -1,3 +1,4 @@
+#include	<iostream>
 #include	"../inc/RPN.hpp"
 
 int	main(int argc, char **argv)
@@ -6,6 +7,8 @@ int	main(int argc, char **argv)
 		return (1);
 
 	RPN	rpn;
-	rpn.parseInput(argv[1]);
+	
+	if (rpn.parseInput(argv[1]))
+		std::cout << rpn.getResult() << std::endl;
 	return (0);
 }

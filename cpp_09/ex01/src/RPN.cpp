@@ -37,72 +37,115 @@ RPN::~RPN()
 	#endif
 }
 
-static bool	isOperator(std::string input, size_t	currentPosition)
+int	RPN::getResult() const
 {
+	return (_data.top());
+}
+bool	RPN::isOperator(std::string input, size_t currentPosition)
+{
+
 	if(!(input[currentPosition] == '+'
 		|| input[currentPosition] == '-'
 		|| input[currentPosition] == '*'
 		|| input[currentPosition] == '/'))
 			return (false);
-	return (true);
+
+	char c = input[currentPosition];
+
+	return (c == '+' || c == '-' || c == '*' || c == '/');
 }
 
-bool	RPN::splitLine(const std::string &inputLine)
+
+// 		case 5:
+
+
+
+bool	RPN::calculate(char op)
 {
-	size_t	startPosition;
-	// size_t   endPosition;
+
+	int	valueA;
+	int	valueB;
+	int	result;
+	
+	std::cout << "[calculate] called with op = '" << op << "'" << std::endl;
+	std::cout << "[calculate] stack size before pop = " << _data.size() << std::endl;
+	if (_data.size() < 2)
+	{
+		std::cerr << "Error: malformed input." << std::endl;
+		return (false);
+	}
+
+	valueB = _data.top();
+	std::cout << "[calculate] popping valueB (top) = " << valueB << std::endl;
+	_data.pop();
+
+	valueA = _data.top();
+	std::cout << "[calculate] popping valueA (new top) = " << valueA << std::endl;
+	_data.pop();
+
+	std::cout << "[calculate] remaining stack size = " << _data.size() << std::endl;
+
+
+
+
+	switch(op)
+	{
+		case '+':
+			result = valueA + valueB;
+			break ;
+
+		case '-':
+			result = valueA - valueB;
+			break ;
+
+		case '*':
+			result = valueA * valueB;
+			break ;
+
+		case '/':
+			result = valueA / valueB;
+			break ;
+		}
+		_data.push(result);
+		return(false);
+}
+
+bool	RPN::parseInput(const std::string &inputLine)
+{
 	size_t	currentPosition;
 
 	currentPosition = 0;
-	startPosition = 0;
+
 	while (currentPosition < inputLine.size())
 	{
-		std::cout << "----" << std::endl;
-		std::cout << "startPosition = " << startPosition
-				<< " | currentPosition = " << currentPosition
-				<< " | char at currentPosition = '"
-				<< inputLine[currentPosition] << "'" << std::endl;
-
-		//  is a valid number store as token?
-		if (inputLine[currentPosition] == ' ')
+		if (std::isspace(inputLine[currentPosition]))
 		{
-			std::cout << "mark isSpace -> '" << inputLine[currentPosition]
-					<< "' at position " << currentPosition << std::endl;
 			currentPosition++;
 			continue ;
 		}
-		// is a valid digit?
 		else if (std::isdigit(inputLine[currentPosition]))
 		{
-			std::cout << "mark isDigit -> '" << inputLine[currentPosition]
-					<< "' at position " << currentPosition << std::endl;
 			_data.push(inputLine[currentPosition] - '0');
 			currentPosition++;
+			if(currentPosition < inputLine.size() && !std::isspace(inputLine[currentPosition]))
+			{
+				std::cerr << "Error: " << std::endl;
+				return (false);
+			}
 			continue ;
 		}
-
-		// is a valid operator?
 		else if(isOperator(inputLine, currentPosition))
 		{
-			std::cout << "mark isOperator -> '" << inputLine[currentPosition]
-					<< "' at position " << currentPosition << std::endl;
-			calculate()
+			if(!calculate(inputLine[currentPosition]))
+				return (false);
 			currentPosition++;
 			continue ;
 		}
-		// trigger calculation of previous elements?
-
 		else
 		{
-			std::cerr << "ERROR at position " << currentPosition
-					<< " char '" << inputLine[currentPosition] << "'" << std::endl;
+			std::cerr << "Error: unsupported input." << std::endl;
 			return (false);
 		}
 	}
 	return (true);
-}
-
-void	RPN::parseInput(std::string inputLine)
-{
-	splitLine(inputLine);
 }
