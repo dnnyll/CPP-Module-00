@@ -22,7 +22,6 @@ class	RPN
 
 		int		getResult() const;
 		bool	parseInput(const std::string &inputLine);
-		bool	isOperator(std::string input, size_t currentPosition);
 		bool	calculate(char op);
 
 };

@@ -46,7 +46,7 @@ int	RPN::getResult() const
 	return (_data.top());
 }
 
-bool	RPN::isOperator(std::string input, size_t currentPosition)
+static bool	isOperator(std::string input, size_t currentPosition)
 {
 	#ifdef DEBUG
 	std::cout << "[ISOPERATOR]\tcalled." << std::endl;
@@ -70,9 +70,6 @@ bool	RPN::calculate(char op)
 	int	valueA;
 	int	valueB;
 	int	result;
-	
-	std::cout << "[calculate] called with op = '" << op << "'" << std::endl;
-	std::cout << "[calculate] stack size before pop = " << _data.size() << std::endl;
 
 	if (_data.size() < 2)
 	{
@@ -81,14 +78,9 @@ bool	RPN::calculate(char op)
 	}
 
 	valueB = _data.top();
-	std::cout << "[calculate] popping valueB (top) = " << valueB << std::endl;
 	_data.pop();
-
 	valueA = _data.top();
-	std::cout << "[calculate] popping valueA (new top) = " << valueA << std::endl;
 	_data.pop();
-
-	std::cout << "[calculate] remaining stack size = " << _data.size() << std::endl;
 
 	switch(op)
 	{
@@ -117,28 +109,32 @@ bool	RPN::parseInput(const std::string &inputLine)
 	#ifdef DEBUG
 	std::cout << "[PARSEINPUT]\tcalled." << std::endl;
 	#endif
+
 	size_t	currentPosition;
 
 	currentPosition = 0;
 
 	while (currentPosition < inputLine.size())
 	{
+		//	skip spaces
 		if (std::isspace(inputLine[currentPosition]))
 		{
 			currentPosition++;
 			continue ;
 		}
+		//	check if isdigit, yes = push value, check if next character is digit = wrong
 		else if (std::isdigit(inputLine[currentPosition]))
 		{
 			_data.push(inputLine[currentPosition] - '0');
 			currentPosition++;
 			if(currentPosition < inputLine.size() && !std::isspace(inputLine[currentPosition]))
 			{
-				std::cerr << "Error: " << std::endl;
+				std::cerr << "Error: malformed input." << std::endl;
 				return (false);
 			}
 			continue ;
 		}
+		//	check if char is valid operator, if yes calculate
 		else if(isOperator(inputLine, currentPosition))
 		{
 			if(!calculate(inputLine[currentPosition]))
@@ -148,14 +144,14 @@ bool	RPN::parseInput(const std::string &inputLine)
 		}
 		else
 		{
-			std::cerr << "Error: unsupported input." << std::endl;
+			std::cerr << "Error: malformed input." << std::endl;
 			return (false);
 		}
 	}
-
+	//	final check if we have more than 1 value at the end of operations
 	if (_data.size() != 1)
 	{
-		std::cerr << "Error: malformed input." << std::endl;
+		std::cerr << "Error: malformed inputasdasd." << std::endl;
 		return (false);
 	}
 	return (true);
