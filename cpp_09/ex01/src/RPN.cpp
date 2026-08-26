@@ -39,10 +39,18 @@ RPN::~RPN()
 
 int	RPN::getResult() const
 {
+	#ifdef DEBUG
+	std::cout << "[GETRESULT]\tcalled." << std::endl;
+	#endif
+
 	return (_data.top());
 }
+
 bool	RPN::isOperator(std::string input, size_t currentPosition)
 {
+	#ifdef DEBUG
+	std::cout << "[ISOPERATOR]\tcalled." << std::endl;
+	#endif
 
 	if(!(input[currentPosition] == '+'
 		|| input[currentPosition] == '-'
@@ -50,18 +58,14 @@ bool	RPN::isOperator(std::string input, size_t currentPosition)
 		|| input[currentPosition] == '/'))
 			return (false);
 
-	char c = input[currentPosition];
-
-	return (c == '+' || c == '-' || c == '*' || c == '/');
+	return (true);
 }
-
-
-// 		case 5:
-
-
 
 bool	RPN::calculate(char op)
 {
+	#ifdef DEBUG
+	std::cout << "[CALCULATE]\tcalled." << std::endl;
+	#endif
 
 	int	valueA;
 	int	valueB;
@@ -69,6 +73,7 @@ bool	RPN::calculate(char op)
 	
 	std::cout << "[calculate] called with op = '" << op << "'" << std::endl;
 	std::cout << "[calculate] stack size before pop = " << _data.size() << std::endl;
+
 	if (_data.size() < 2)
 	{
 		std::cerr << "Error: malformed input." << std::endl;
@@ -84,9 +89,6 @@ bool	RPN::calculate(char op)
 	_data.pop();
 
 	std::cout << "[calculate] remaining stack size = " << _data.size() << std::endl;
-
-
-
 
 	switch(op)
 	{
@@ -107,11 +109,14 @@ bool	RPN::calculate(char op)
 			break ;
 		}
 		_data.push(result);
-		return(false);
+		return(true);
 }
 
 bool	RPN::parseInput(const std::string &inputLine)
 {
+	#ifdef DEBUG
+	std::cout << "[PARSEINPUT]\tcalled." << std::endl;
+	#endif
 	size_t	currentPosition;
 
 	currentPosition = 0;
@@ -146,6 +151,12 @@ bool	RPN::parseInput(const std::string &inputLine)
 			std::cerr << "Error: unsupported input." << std::endl;
 			return (false);
 		}
+	}
+
+	if (_data.size() != 1)
+	{
+		std::cerr << "Error: malformed input." << std::endl;
+		return (false);
 	}
 	return (true);
 }
