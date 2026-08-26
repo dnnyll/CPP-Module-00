@@ -23,14 +23,14 @@ BitcoinExchange::BitcoinExchange(const BitcoinExchange &src)
 	*this = src;
 }
 
-BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &rhs)
+BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &input)
 {
 	#ifdef DEBUG
 	std::cout << "[COPY A.OPER.]\tcalled." << std::endl;
 	#endif
 
-	if (this != &rhs)
-		_data = rhs._data;
+	if (this != &input)
+		_data = input._data;
 	return (*this);
 }
 
@@ -42,15 +42,20 @@ BitcoinExchange::~BitcoinExchange()
 }
 
 // trims content removing shitespaces or tabs
-std::string trim(const std::string &str)
+std::string	trim(const std::string &inputStr)
 {
-	size_t	start = str.find_first_not_of(" \t");
-	size_t	end = str.find_last_not_of(" \t");
+	size_t		start;
+	size_t		end;
+	std::string	trimedStr;
 
+	start = inputStr.find_first_not_of(" \t");
+	end = inputStr.find_last_not_of(" \t");
+
+	//	if string doesn't contain other characters than " " or "\t"
 	if (start == std::string::npos)
 		return ("");
 
-	std::string	trimedStr = str.substr(start, end - start + 1);
+	trimedStr = inputStr.substr(start, end - start + 1);
 
 	return (trimedStr);
 }
@@ -59,11 +64,13 @@ std::string trim(const std::string &str)
 // splits and stores key and value from the input string
 bool	BitcoinExchange::splitLine(const std::string &line, std::string &dateStr, std::string &valueStr)
 {
-		size_t	position = line.find('|');
+		size_t	position;
+
+		position = line.find('|');
 
 		if(position == std::string::npos)
 		{
-			std::cerr << "Error: bad input." << std::endl;
+			std::cerr << "Error: bad input => " << line << std::endl;
 			return (false);
 		}
 		dateStr = line.substr(0, position);
@@ -79,15 +86,18 @@ bool	BitcoinExchange::splitLine(const std::string &line, std::string &dateStr, s
 // converts date str into int and verifies if the date is in the calendar
 static bool	convertYear(const std::string &dateStr)
 {
-	int	year =	std::atoi(dateStr.substr(0, 4).c_str());
-	int	month =	std::atoi(dateStr.substr(5, 2).c_str());
-	int	day =	std::atoi(dateStr.substr(8, 2).c_str());
+	int	year;
+	int	month;
+	int	day;
+
+	year =	std::atoi(dateStr.substr(0, 4).c_str());
+	month =	std::atoi(dateStr.substr(5, 2).c_str());
+	day =	std::atoi(dateStr.substr(8, 2).c_str());
 	
 	if (month < 1 || month > 12)
 		return (false);
 
 	int	monthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-	
 	int	maxDays = monthDays[month - 1];
 
 	if (month == 2 && ((year % 4 == 0 && year %100 != 0) || year %400 == 0))
@@ -127,7 +137,7 @@ bool	BitcoinExchange::validateDate(const std::string &dateStr)
 	return (true);
 }
 
-// verifie if the value str is well formulated and returns error if not
+// verifies if the value str is well formulated and returns error if not
 bool	BitcoinExchange::validateValue(std::string &valueStr)
 {
 	char	*lastChar;
@@ -138,7 +148,7 @@ bool	BitcoinExchange::validateValue(std::string &valueStr)
 		std::cerr << "Error: not a valid number." << std::endl;
 		return (false);
 	}
-	if (value < 1)
+	if (value < 0)
 	{
 		std::cerr << "Error: not a positive number." << std::endl;
 		return (false);
@@ -208,7 +218,7 @@ void	BitcoinExchange::loadDatabase(const std::string &filename)
 //	opens inputfile and parses it
 void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 {
-	//	opens the file and ifstream doesnt read strings so c_str converts the string to const char*
+	//	opens the file, ifstream can't read strings so c_str converts the string to const char*
 	std::ifstream	file(inputFilename.c_str());
 	
 	if(!file.is_open())
@@ -217,8 +227,9 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		return ;
 	}
 
-	std::string	line;
-	std::getline(file, line);	// skip headerline ("date" | "value")
+	std::string		line;
+	// skip headerline ("date" | "value")
+	std::getline(file, line);
 
 	while (std::getline(file, line))
 	{
@@ -236,8 +247,11 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		#endif
 
 		if (!validateDate(dateStr))
+		{
+			std::cerr << "Error: bad input => " << line << std::endl;
 			continue ;
 
+		}
 		if (!validateValue(valueStr))
 			continue ;
 
@@ -252,6 +266,5 @@ void	BitcoinExchange::parseInputFile(const std::string& inputFilename)
 		{
 			std::cerr << "Error: no earlier date available for date " << dateStr << std::endl;
 		}
-	
 	}
 }
